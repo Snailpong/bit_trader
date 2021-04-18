@@ -1,0 +1,26 @@
+from torch.utils.data import DataLoader
+import os
+import random
+import torch
+import numpy as np
+
+
+class MyBaseDataset(DataLoader):
+    def __init__(self):
+        self.train_x = np.load('./data/train_x.npy')
+        self.train_y = np.load('./data/train_y.npy')
+
+
+    def __len__(self):
+        return self.train_x.shape[0]
+
+
+class MyDataset(MyBaseDataset):
+    def __getitem__(self, index):
+        current_x = torch.from_numpy(self.train_x[index, :, 1][np.newaxis, :])
+        if self.train_y[index, :, 1].max() > 1.01:
+            current_y = 1
+        else:
+            current_y = 0
+
+        return current_x, current_y
