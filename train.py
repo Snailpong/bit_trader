@@ -19,7 +19,7 @@ from datasets import MyDataset
 from models import MyModel
 
 
-BATCH_SIZE = 16
+BATCH_SIZE = 32
 
 def train():
     os.environ['CUDA_VISIBLE_DEVICES'] = '0'
@@ -30,10 +30,12 @@ def train():
     random.seed(1234)
     np.random.seed(1234)
 
-    data_col_idx = 1 # 1 open, 2 high
-
     dataset = MyDataset()
-    dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
+    train_size = int(0.8 * len(dataset))
+    test_size = len(dataset) - train_size
+    train_dataset, test_dataset = torch.utils.data.random_split(dataset, [train_size, test_size])
+    train_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+    test_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE)
 
     os.makedirs('./model', exist_ok=True)
 
@@ -49,12 +51,12 @@ def train():
 
         model.train()
 
-        pbar = tqdm(range(len(dataloader)))
+        pbar = tqdm(range(len(train_dataloader)))
         pbar.set_description('Epoch {}'.format(epoch))
         total_loss = .0
         correct = 0
 
-        for idx, (train_x, train_y) in enumerate(dataloader):
+        for idx, (train_x, train_y) in enumerate(train_dataloader):
             train_x = train_x.to(device, dtype=torch.float32)
             train_y = train_y.to(device, dtype=torch.long)
 
@@ -69,6 +71,24 @@ def train():
             total_loss += loss.detach().cpu().numpy()
             pbar.set_postfix_str('loss: {}, acc: {}'.format(np.around(total_loss / (idx + 1), 4), np.around(correct / ((idx + 1) * BATCH_SIZE), 4)))
             pbar.update()
+
+        with torch.no_grad():
+            correct_val = 0
+            tp, tn, fp, fn = 0, 0, 0, 0
+            for idx, (val_x, val_y) in enumerate(test_dataloader):
+                val_x = val_x.to(device, dtype=torch.float32)
+                val_y = val_y.to(device, dtype=torch.long)
+
+                output = model(val_x)
+                label = torch.argmax(output, 1)
+                correct_val += int((label == val_y).float().sum())
+                tp += int(torch.logical_and((label == val_y), label == 1).float().sum())
+                tn += int(torch.logical_and((label == val_y), label == 0).float().sum())
+                fp += int(torch.logical_and((label != val_y), label == 1).float().sum())
+                fn += int(torch.logical_and((label != val_y), label == 0).float().sum())
+
+            print('TP: {}, TN: {}, FP: {}, FN: {}'.format(tp, tn, fp, fn))
+
 
 
 if __name__ == '__main__':
