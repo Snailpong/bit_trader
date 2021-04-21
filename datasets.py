@@ -17,12 +17,14 @@ class MyBaseDataset(DataLoader):
 
 class MyDataset(MyBaseDataset):
     def __getitem__(self, index):
-        current_x = torch.from_numpy(self.train_x[index, :, np.array([1, 5])])
+        current_x = torch.from_numpy(self.train_x[index, :, np.array([1, 2,3,5])])
         # current_x = torch.from_numpy(self.train_x[index, :, 1][np.newaxis, :])
         current_x[0] = (current_x[0] - 1) * 50
         if self.train_y[index, :, 1].max() > 1.005:
-            current_y = 1
+            # current_y = 1
+            current_y = np.array([1])
         else:
-            current_y = 0
+            # current_y = 0
+            current_y = np.array([0])
 
         return current_x, current_y

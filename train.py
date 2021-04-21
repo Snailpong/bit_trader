@@ -45,6 +45,8 @@ def train():
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 
     cross_criterion = nn.CrossEntropyLoss()
+    mae_criterion = nn.L1Loss()
+    mse_criterion = nn.MSELoss()
 
     while epoch <= 500:
         epoch += 1
@@ -58,11 +60,11 @@ def train():
 
         for idx, (train_x, train_y) in enumerate(train_dataloader):
             train_x = train_x.to(device, dtype=torch.float32)
-            train_y = train_y.to(device, dtype=torch.long)
+            train_y = train_y.to(device, dtype=torch.float32)
 
             output = model(train_x)
 
-            loss = cross_criterion(output, train_y)
+            loss = mse_criterion(output, train_y)
             correct += int((torch.argmax(output, 1) == train_y).float().sum())
             optimizer.zero_grad()
             loss.backward()
@@ -80,7 +82,9 @@ def train():
                 val_y = val_y.to(device, dtype=torch.long)
 
                 output = model(val_x)
-                label = torch.argmax(output, 1)
+                # label = torch.argmax(output, 1)
+                label = torch.round(output)
+                # print(label.shape, val_y.shape)
                 correct_val += int((label == val_y).float().sum())
                 tp += int(torch.logical_and((label == val_y), label == 1).float().sum())
                 tn += int(torch.logical_and((label == val_y), label == 0).float().sum())
