@@ -15,18 +15,16 @@ from tqdm import tqdm
 import numpy as np
 
 from preprocessing import df2d_to_array3d, get_dataframe
-from datasets import MyDataset
+from datasets import MyDataset1
 from models import MyModel
-from utils import init_device_seed
 
 
 BATCH_SIZE = 32
 
-
 def train():
     device = init_device_seed()
 
-    dataset = MyDataset()
+    dataset = MyDataset1()
     train_size = int(0.8 * len(dataset))
     test_size = len(dataset) - train_size
     train_dataset, test_dataset = torch.utils.data.random_split(dataset, [train_size, test_size])
@@ -67,24 +65,28 @@ def train():
             optimizer.step()
 
             total_loss += loss.detach().cpu().numpy()
-            pbar.set_postfix_str('loss: {}'.format(np.around(total_loss / (idx + 1), 4)))
+            pbar.set_postfix_str('loss: {}, acc: {}'.format(np.around(total_loss / (idx + 1), 4), np.around(correct / ((idx + 1) * BATCH_SIZE), 4)))
             pbar.update()
 
-        torch.save(model.state_dict(), './model/mymodel')
-        total_val_loss = .0
-
         with torch.no_grad():
+            correct_val = 0
+            tp, tn, fp, fn = 0, 0, 0, 0
             for idx, (val_x, val_y) in enumerate(test_dataloader):
                 val_x = val_x.to(device, dtype=torch.float32)
                 val_y = val_y.to(device, dtype=torch.long)
 
                 output = model(val_x)
-                label = torch.round(output * 120)
+                # label = torch.argmax(output, 1)
+                label = torch.round(output)
+                # print(label.shape, val_y.shape)
+                correct_val += int((label == val_y).float().sum())
+                tp += int(torch.logical_and((label == val_y), label == 1).float().sum())
+                tn += int(torch.logical_and((label == val_y), label == 0).float().sum())
+                fp += int(torch.logical_and((label != val_y), label == 1).float().sum())
+                fn += int(torch.logical_and((label != val_y), label == 0).float().sum())
 
-                loss = mse_criterion(output, train_y)
-                total_val_loss += loss.detach().cpu().numpy()
+            print('TP: {}, TN: {}, FP: {}, FN: {}'.format(tp, tn, fp, fn))
 
-        print('\nval loss: ' + str(total_val_loss / len(test_dataloader)))
 
 
 if __name__ == '__main__':

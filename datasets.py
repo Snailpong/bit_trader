@@ -17,7 +17,15 @@ class MyBaseDataset(DataLoader):
 
 class MyDataset(MyBaseDataset):
     def __getitem__(self, index):
-        current_x = torch.from_numpy(self.train_x[index, :, np.array([1, 2,3,5])])
+        current_x = torch.from_numpy(self.train_x[index, :, np.array([1,2,3,5])])
+        current_y = np.array([np.argmax(self.train_y[index, :, 1]) / 120.])
+
+        return current_x, current_y
+
+
+class MyDataset1(MyBaseDataset):
+    def __getitem__(self, index):
+        current_x = torch.from_numpy(self.train_x[index, :, np.array([1,2,3,5])])
         # current_x = torch.from_numpy(self.train_x[index, :, 1][np.newaxis, :])
         current_x[0] = (current_x[0] - 1) * 50
         if self.train_y[index, :, 1].max() > 1.005:

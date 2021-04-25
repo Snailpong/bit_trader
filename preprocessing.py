@@ -12,20 +12,20 @@ def df2d_to_array3d(df_2d):
     return array_3d
 
 
-def get_dataframe():
-    train_x_df = pd.read_csv('./data/train_x_df.csv')
-    train_y_df = pd.read_csv('./data/train_y_df.csv')
+def get_array(file_path):
+    df = pd.read_csv(file_path)
+    array = df2d_to_array3d(df)
 
-    return train_x_df, train_y_df
+    return array
 
 
 if __name__ == '__main__':
-    train_x_df, train_y_df = get_dataframe()
+    train_x_array = get_array('./data/train_x_df.csv')
+    train_y_array = get_array('./data/train_y_df.csv')
+    test_x_array = get_array('./data/test_x_df.csv')
 
-    train_x_array = df2d_to_array3d(train_x_df)
-    train_y_array = df2d_to_array3d(train_y_df)
-
-    # train_x_array (7661, 1380, 10), train_y_array (7661, 120, 10)
+    # train_x_array (7661, 1380, 10), train_y_array (7661, 120, 10), test_y_array (535, 120, 10)
 
     np.save('./data/train_x', train_x_array)
     np.save('./data/train_y', train_y_array)
+    np.save('./data/test_x', test_x_array)
