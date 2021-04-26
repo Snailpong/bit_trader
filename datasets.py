@@ -4,6 +4,8 @@ import random
 import torch
 import numpy as np
 
+from preprocessing import gauss_convolve_instance
+
 
 class MyBaseDataset(DataLoader):
     def __init__(self):
@@ -17,7 +19,8 @@ class MyBaseDataset(DataLoader):
 
 class MyDataset(MyBaseDataset):
     def __getitem__(self, index):
-        current_x = torch.from_numpy(self.train_x[index, :, np.array([1,2,3,5])])
+        current_x = self.train_x[index, :, np.array([1,2,3,5])]
+        current_x = gauss_convolve_instance(current_x, [0, 1, 2], 0.5)
         current_y = np.array([np.argmax(self.train_y[index, :, 1]) / 120.])
 
         return current_x, current_y

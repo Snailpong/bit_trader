@@ -14,7 +14,6 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 import numpy as np
 
-from preprocessing import df2d_to_array3d, get_dataframe
 from datasets import MyDataset
 from models import MyModel
 from utils import init_device_seed
@@ -37,6 +36,7 @@ def train():
 
     model = MyModel().to(device)
     epoch = 0
+    min_total_val_loss = 9999
 
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 
@@ -57,7 +57,6 @@ def train():
         for idx, (train_x, train_y) in enumerate(train_dataloader):
             train_x = train_x.to(device, dtype=torch.float32)
             train_y = train_y.to(device, dtype=torch.float32)
-
             output = model(train_x)
 
             loss = mse_criterion(output, train_y)
@@ -70,7 +69,6 @@ def train():
             pbar.set_postfix_str('loss: {}'.format(np.around(total_loss / (idx + 1), 4)))
             pbar.update()
 
-        torch.save(model.state_dict(), './model/mymodel')
         total_val_loss = .0
 
         with torch.no_grad():
@@ -81,10 +79,14 @@ def train():
                 output = model(val_x)
                 label = torch.round(output * 120)
 
-                loss = mse_criterion(output, train_y)
+                loss = mse_criterion(output, val_y)
                 total_val_loss += loss.detach().cpu().numpy()
 
         print('\nval loss: ' + str(total_val_loss / len(test_dataloader)))
+
+        if min_total_val_loss > total_val_loss:
+            min_total_val_loss = total_val_loss
+            torch.save(model.state_dict(), './model/mymodel')
 
 
 if __name__ == '__main__':

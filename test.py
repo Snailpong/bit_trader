@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 from models import MyModel
+from preprocessing import gauss_convolve_instance
 from utils import init_device_seed
 
 
@@ -31,7 +32,9 @@ def test():
     for index in range(535):
         print('\r{}/535'.format(index), end=' ')
 
-        test_x = torch.from_numpy(test_dataset[index, :, np.array([1,2,3,5])])
+        test_x = test_dataset[index, :, np.array([1, 2, 3, 5])]
+        test_x = gauss_convolve_instance(test_x, [0, 1, 2], 0.5)
+        test_x = torch.from_numpy(test_x)
         test_x = torch.unsqueeze(test_x, 0).to(device, dtype=torch.float32)
 
         output = model(test_x)
