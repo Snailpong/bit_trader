@@ -14,9 +14,9 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 import numpy as np
 
-from datasets import MyDataset
+from datasets import MyDataset, get_dataset
 from models import MyModel
-from utils import init_device_seed
+from utils import init_device_seed, write_val_csv
 
 
 BATCH_SIZE = 32
@@ -25,12 +25,11 @@ BATCH_SIZE = 32
 def train():
     device = init_device_seed()
 
-    dataset = MyDataset()
-    train_size = int(0.8 * len(dataset))
-    test_size = len(dataset) - train_size
-    train_dataset, test_dataset = torch.utils.data.random_split(dataset, [train_size, test_size])
+    train, val, indicate = get_dataset()
+    train_dataset = MyDataset(train)
+    val_dataset = MyDataset(val)
     train_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
-    test_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE)
+    val_dataloader = DataLoader(val_dataset, batch_size=BATCH_SIZE)
 
     os.makedirs('./model', exist_ok=True)
 
@@ -70,23 +69,25 @@ def train():
             pbar.update()
 
         total_val_loss = .0
+        labels = []
 
         with torch.no_grad():
-            for idx, (val_x, val_y) in enumerate(test_dataloader):
+            for idx, (val_x, val_y) in enumerate(val_dataloader):
                 val_x = val_x.to(device, dtype=torch.float32)
                 val_y = val_y.to(device, dtype=torch.long)
 
                 output = model(val_x)
-                label = torch.round(output * 120)
+                labels.append(output.detach().cpu().numpy())
 
                 loss = mse_criterion(output, val_y)
                 total_val_loss += loss.detach().cpu().numpy()
 
-        print('\nval loss: ' + str(total_val_loss / len(test_dataloader)))
+        print('\nval loss: ' + str(total_val_loss / len(val_dataloader)))
 
         if min_total_val_loss > total_val_loss:
             min_total_val_loss = total_val_loss
             torch.save(model.state_dict(), './model/mymodel')
+            write_val_csv(labels, indicate)
 
 
 if __name__ == '__main__':

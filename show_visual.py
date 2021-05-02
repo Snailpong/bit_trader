@@ -1,7 +1,7 @@
+import random
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
-
-from preprocessing import df2d_to_array3d, get_dataframe
 
 
 def plot_series(x_series, y_series):
@@ -12,15 +12,32 @@ def plot_series(x_series, y_series):
     plt.axhline(1, c = 'red')
     plt.legend()
 
+
+def show_example():
+    x = np.load('./data/train_x.npy')
+    y = np.load('./data/train_y.npy')
+
+    idx = 2100
+
+    plot_series(x[idx, :, 1], y[idx, :, 1])
+    plt.show()
+
+
+def show_trained_result():
+    x = np.load('./data/train_x.npy')
+    y = np.load('./data/train_y.npy')
+
+    val = pd.read_csv('./result/validation.csv')
+    len_val = len(val)
+
+    for i in range(6):
+        plt.subplot(2, 3, i+1)
+        idx = random.randrange(len_val)
+
+        plot_series(x[idx, :, 1], y[idx, :, 1])
+        plt.axvline(1380 + val.loc[idx, 'sell_time'], c = 'blue')
     plt.show()
 
 
 if __name__ == '__main__':
-    train_x_df, train_y_df = get_dataframe()
-    train_x_array = df2d_to_array3d(train_x_df)
-    train_y_array = df2d_to_array3d(train_y_df)
-
-    idx = 2100
-
-    plot_series(train_x_array[idx, :, 1], train_y_array[idx, :, 1])
-
+    show_trained_result()
