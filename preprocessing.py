@@ -54,13 +54,34 @@ def gauss_convolve_instance(array, rows, sigma):
     return array
 
 
-if __name__ == '__main__':
-    train_x_array = get_array('./data/train_x_df.csv')
-    train_y_array = get_array('./data/train_y_df.csv')
-    test_x_array = get_array('./data/test_x_df.csv')
+def make_npy():
+    train_x = get_array('./data/train_x_df.csv')
+    train_y = get_array('./data/train_y_df.csv')
+    test_x = get_array('./data/test_x_df.csv')
 
     # train_x_array (7661, 1380, 10), train_y_array (7661, 120, 10), test_y_array (535, 120, 10)
 
-    np.save('./data/train_x', train_x_array)
-    np.save('./data/train_y', train_y_array)
-    np.save('./data/test_x', test_x_array)
+    np.save('./data/train_x', train_x)
+    np.save('./data/train_y', train_y)
+    np.save('./data/test_x', test_x)
+
+
+def make_only_increased():
+    train_x = np.load('./data/train_x.npy')
+    train_y = np.load('./data/train_y.npy')
+
+    idx_increase = []
+
+    for i in range(train_x.shape[0]):
+        if train_y[i, :, 1].mean() >= 1.00:
+            idx_increase.append(i)
+        
+    idx_increase = np.array(idx_increase)
+
+    np.save('./data/train_x_increase', train_x[idx_increase])
+    np.save('./data/train_y_increase', train_y[idx_increase])
+
+
+if __name__ == '__main__':
+    # make_npy()
+    make_only_increased()

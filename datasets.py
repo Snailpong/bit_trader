@@ -8,8 +8,8 @@ from preprocessing import gauss_convolve_instance
 
 
 def get_dataset():
-    x = np.load('./data/train_x.npy')
-    y = np.load('./data/train_y.npy')
+    x = np.load('./data/train_x_increase.npy')
+    y = np.load('./data/train_y_increase.npy')
 
     total_len = x.shape[0]
     train_len = int(total_len * 0.8)

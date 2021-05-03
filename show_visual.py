@@ -36,6 +36,7 @@ def show_trained_result():
 
         plot_series(x[idx, :, 1], y[idx, :, 1])
         plt.axvline(1380 + val.loc[idx, 'sell_time'], c = 'blue')
+        plt.axhline(y[idx, val.loc[idx, 'sell_time'], 1], c = 'green')
     plt.show()
 
 
