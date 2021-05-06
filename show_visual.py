@@ -24,8 +24,8 @@ def show_example():
 
 
 def show_trained_result():
-    x = np.load('./data/train_x.npy')
-    y = np.load('./data/train_y.npy')
+    x = np.load('./data/train_x_increase.npy')
+    y = np.load('./data/train_y_increase.npy')
 
     val = pd.read_csv('./result/validation.csv')
     len_val = len(val)

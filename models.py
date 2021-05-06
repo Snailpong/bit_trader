@@ -4,9 +4,9 @@ from torch import nn
 from torch.nn import functional as F
 
 
-class MyModel(nn.Module):
+class BaseModel(nn.Module):
     def __init__(self):
-        super(MyModel, self).__init__()
+        super(BaseModel, self).__init__()
         self.layers = nn.Sequential(
             nn.Conv1d(4, 64, 7, 1),
             nn.BatchNorm1d(64),
@@ -28,12 +28,23 @@ class MyModel(nn.Module):
             nn.MaxPool1d(5, 2),
             nn.Flatten(),
             nn.Linear(38912, 64),
-            nn.Linear(64, 16),
-            nn.Linear(16, 4),
-            nn.Linear(4, 1)
+            nn.Linear(64, 16)
         )
 
 
     def forward(self, x):
         x = self.layers(x)
+        return x
+
+
+class MyModel(nn.Module):
+    def __init__(self, channel):
+        super(MyModel, self).__init__()
+        self.base = BaseModel()
+        self.final = nn.Linear(16, channel)
+
+    
+    def forward(self, x):
+        x = self.base(x)
+        x = self.final(x)
         return x

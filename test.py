@@ -22,8 +22,8 @@ def test():
 
     os.makedirs('./result', exist_ok=True)
 
-    model = MyModel().to(device)
-    model.load_state_dict(torch.load('./model/mymodel', map_location=device))
+    model = MyModel(1).to(device)
+    model.load_state_dict(torch.load('./model/maxday', map_location=device))
     model.eval()
 
     f = open('./result/submission.csv', 'w')

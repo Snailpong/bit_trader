@@ -25,7 +25,7 @@ BATCH_SIZE = 32
 def train():
     device = init_device_seed()
 
-    train, val, indicate = get_dataset()
+    train, val, indicate = get_dataset('./data/train_x_increase.npy', './data/train_y_increase.npy')
     train_dataset = MyDataset(train)
     val_dataset = MyDataset(val)
     train_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
@@ -33,7 +33,7 @@ def train():
 
     os.makedirs('./model', exist_ok=True)
 
-    model = MyModel().to(device)
+    model = MyModel(1).to(device)
     epoch = 0
     min_total_val_loss = 9999
 
@@ -86,7 +86,7 @@ def train():
 
         if min_total_val_loss > total_val_loss:
             min_total_val_loss = total_val_loss
-            torch.save(model.state_dict(), './model/mymodel')
+            torch.save(model.state_dict(), './model/maxday')
             write_val_csv(labels, indicate)
 
 

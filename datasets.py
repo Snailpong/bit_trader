@@ -4,12 +4,12 @@ import random
 import torch
 import numpy as np
 
-from preprocessing import gauss_convolve_instance
+from preprocessing import gauss_convolve_instance, gauss_1d, convolve_1d
 
 
-def get_dataset():
-    x = np.load('./data/train_x_increase.npy')
-    y = np.load('./data/train_y_increase.npy')
+def get_dataset(file_x, file_y):
+    x = np.load(file_x)
+    y = np.load(file_y)
 
     total_len = x.shape[0]
     train_len = int(total_len * 0.8)
@@ -31,6 +31,7 @@ class MyBaseDataset(DataLoader):
     def __init__(self, dataset):
         self.x = dataset[0]
         self.y = dataset[1]
+        self.filter = gauss_1d(0.5)
 
 
     def __len__(self):
@@ -41,7 +42,7 @@ class MyDataset(MyBaseDataset):
     def __getitem__(self, index):
         current_x = self.x[index, :, np.array([1,2,3,5])]
         current_x = gauss_convolve_instance(current_x, [0, 1, 2], 0.5)
-        current_y = np.array([np.argmax(self.y[index, :, 1]) / 120.])
+        current_y = np.array([np.argmax(convolve_1d(self.y[index, :, 1], self.filter)) / 120.])
 
         return current_x, current_y
 
@@ -51,11 +52,11 @@ class MyDataset1(MyBaseDataset):
         current_x = torch.from_numpy(self.x[index, :, np.array([1,2,3,5])])
         # current_x = torch.from_numpy(self.x[index, :, 1][np.newaxis, :])
         current_x[0] = (current_x[0] - 1) * 50
-        if self.y[index, :, 1].max() > 1.005:
-            # current_y = 1
-            current_y = np.array([1])
+        if self.y[index, :, 1].mean() > 1.00:
+            current_y = 1
+            # current_y = np.array([1])
         else:
-            # current_y = 0
-            current_y = np.array([0])
+            current_y = 0
+            # current_y = np.array([0])
 
         return current_x, current_y
