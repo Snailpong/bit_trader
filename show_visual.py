@@ -14,7 +14,7 @@ def plot_series(x_series, y_series):
 
 
 def show_example():
-    x = np.load('./data/train_x.npy')
+    x = np.load('./data/train_x_5.npy')
     y = np.load('./data/train_y.npy')
 
     idx = 2100
@@ -41,4 +41,5 @@ def show_trained_result():
 
 
 if __name__ == '__main__':
+    # show_example()
     show_trained_result()

@@ -41,6 +41,7 @@ class MyBaseDataset(DataLoader):
 class MyDataset(MyBaseDataset):
     def __getitem__(self, index):
         current_x = self.x[index, :, np.array([1,2,3,5])]
+        current_x[:, 5] /= np.mean(current_x[:, 5])
         current_x = gauss_convolve_instance(current_x, [0, 1, 2], 0.5)
         current_y = np.array([np.argmax(convolve_1d(self.y[index, :, 1], self.filter)) / 120.])
 

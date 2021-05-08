@@ -82,6 +82,38 @@ def make_only_increased():
     np.save('./data/train_y_increase', train_y[idx_increase])
 
 
+def make_one_period(period, array):
+    array_p = np.empty((array.shape[0], array.shape[1] // period, array.shape[2]))
+    mod = array.shape[1] % period
+
+    for i in range(array_p.shape[1]):
+        start_time = mod + i * period
+        array_p[:, i, 0] = array[:, start_time, 0]
+        array_p[:, i, 1] = array[:, start_time, 1]
+        array_p[:, i, 2] = np.max(array[:, start_time:start_time + period, 2], axis=1)
+        array_p[:, i, 3] = np.min(array[:, start_time:start_time + period, 3], axis=1)
+        array_p[:, i, 4] = array[:, start_time + period - 1, 4]
+        array_p[:, i, 5:] = np.mean(array[:, start_time:start_time + period, 5:], axis=1)
+        
+
+    print(array[0, 0], array_p[0, 0])
+
+    return array_p
+
+
+def make_period(period):
+    train_x = np.load('./data/train_x.npy')
+    test_x = np.load('./data/test_x.npy')
+
+    train_x_p = make_one_period(period, train_x)
+    test_x_p = make_one_period(period, test_x)
+
+    np.save('./data/train_x_' + str(period), train_x_p)
+    np.save('./data/test_x_' + str(period), test_x_p)
+
+
 if __name__ == '__main__':
     # make_npy()
-    make_only_increased()
+    # make_only_increased()
+    make_period(5)
+    make_period(15)

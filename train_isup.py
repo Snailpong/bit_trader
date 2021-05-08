@@ -25,7 +25,7 @@ BATCH_SIZE = 32
 def train():
     device = init_device_seed()
 
-    train, val, indicate = get_dataset('./data/train_x.npy', './data/train_y.npy')
+    train, val, indicate = get_dataset('./data/train_x_5.npy', './data/train_y.npy')
     train_dataset = MyDataset1(train)
     val_dataset = MyDataset1(val)
     train_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
@@ -33,7 +33,7 @@ def train():
 
     os.makedirs('./model', exist_ok=True)
 
-    model = MyModel(2).to(device)
+    model = MyModel(2, 3584).to(device)
     epoch = 0
     min_total_val_loss = 9999
 

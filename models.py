@@ -5,7 +5,7 @@ from torch.nn import functional as F
 
 
 class BaseModel(nn.Module):
-    def __init__(self):
+    def __init__(self, fc):
         super(BaseModel, self).__init__()
         self.layers = nn.Sequential(
             nn.Conv1d(4, 64, 7, 1),
@@ -27,7 +27,7 @@ class BaseModel(nn.Module):
             nn.LeakyReLU(),
             nn.MaxPool1d(5, 2),
             nn.Flatten(),
-            nn.Linear(38912, 64),
+            nn.Linear(fc, 64),
             nn.Linear(64, 16)
         )
 
@@ -38,9 +38,9 @@ class BaseModel(nn.Module):
 
 
 class MyModel(nn.Module):
-    def __init__(self, channel):
+    def __init__(self, channel, fc):
         super(MyModel, self).__init__()
-        self.base = BaseModel()
+        self.base = BaseModel(fc)
         self.final = nn.Linear(16, channel)
 
     
