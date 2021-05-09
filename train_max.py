@@ -49,8 +49,6 @@ def train():
 
         model.train()
 
-        pbar = tqdm(range(len(train_dataloader)))
-        pbar.set_description('Epoch {}'.format(epoch))
         total_loss = .0
         correct = 0
 
@@ -66,8 +64,7 @@ def train():
             optimizer.step()
 
             total_loss += loss.detach().cpu().numpy()
-            pbar.set_postfix_str('loss: {}'.format(np.around(total_loss / (idx + 1), 4)))
-            pbar.update()
+            print('\rEpoch {}: {}/{}, loss: {}'.format(epoch, idx, len(train_dataloader), np.around(total_loss / (idx + 1), 4)), end='')
 
         total_val_loss = .0
         labels = []
@@ -83,12 +80,12 @@ def train():
                 loss = mse_criterion(output, val_y)
                 total_val_loss += loss.detach().cpu().numpy()
 
-        print('\nval loss: ' + str(total_val_loss / len(val_dataloader)))
+        print('\tval loss: ' + str(total_val_loss / len(val_dataloader)))
 
         if min_total_val_loss > total_val_loss:
             min_total_val_loss = total_val_loss
             torch.save(model.state_dict(), './model/maxday')
-            write_val_csv(labels, indicate)
+            write_val_csv('./result/validation_max.csv', labels, indicate, True)
 
 
 if __name__ == '__main__':

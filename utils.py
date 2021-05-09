@@ -16,15 +16,18 @@ def init_device_seed():
     return device
 
 
-def write_val_csv(labels, indicate):
+def write_val_csv(file_name, labels, indicate, is_day):
     index = [0, 0]
     val_indicate = indicate[int(indicate.shape[0] * 0.8):]
 
-    f = open('./result/validation.csv', 'w')
+    f = open(file_name, 'w')
     f.write('sample_id,buy_quantity,sell_time\n')
 
     for i in range(val_indicate.shape[0]):
-        label = int(np.clip(np.around(labels[index[0]][index[1], 0] * 120.), 0, 119))
+        if is_day:
+            label = int(np.clip(np.around(labels[index[0]][index[1], 0] * 120.), 0, 119))
+        else:
+            label = labels[index[0]][index[1], 0]
         f.write('{},1.0,{}\n'.format(val_indicate[i], label))
 
         index[1] += 1

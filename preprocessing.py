@@ -69,17 +69,24 @@ def make_npy():
 def make_only_increased():
     train_x = np.load('./data/train_x.npy')
     train_y = np.load('./data/train_y.npy')
+    is_increase = np.empty(train_x.shape[0])
 
     idx_increase = []
+    count = 0
 
     for i in range(train_x.shape[0]):
         if train_y[i, :, 1].mean() >= 1.00:
             idx_increase.append(i)
+            is_increase[i] = count
+            count += 1
+        else:
+            is_increase[i] = -1
         
     idx_increase = np.array(idx_increase)
 
-    np.save('./data/train_x_increase', train_x[idx_increase])
-    np.save('./data/train_y_increase', train_y[idx_increase])
+    # np.save('./data/train_x_increase', train_x[idx_increase])
+    # np.save('./data/train_y_increase', train_y[idx_increase])
+    np.save('./data/is_increase', train_y[idx_increase])
 
 
 def make_one_period(period, array):
@@ -114,6 +121,6 @@ def make_period(period):
 
 if __name__ == '__main__':
     # make_npy()
-    # make_only_increased()
-    make_period(5)
-    make_period(15)
+    make_only_increased()
+    # make_period(5)
+    # make_period(15)

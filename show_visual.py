@@ -23,11 +23,11 @@ def show_example():
     plt.show()
 
 
-def show_trained_result():
+def show_trained_result_max():
     x = np.load('./data/train_x_increase.npy')
     y = np.load('./data/train_y_increase.npy')
 
-    val = pd.read_csv('./result/validation.csv')
+    val = pd.read_csv('./result/validation_max.csv')
     len_val = len(val)
 
     for i in range(6):
@@ -37,9 +37,30 @@ def show_trained_result():
         plot_series(x[idx, :, 1], y[idx, :, 1])
         plt.axvline(1380 + val.loc[idx, 'sell_time'], c = 'blue')
         plt.axhline(y[idx, val.loc[idx, 'sell_time'], 1], c = 'green')
+
+
+    plt.show()
+
+
+def show_trained_result_isup():
+    x = np.load('./data/train_x.npy')
+    y = np.load('./data/train_y.npy')
+
+    val = pd.read_csv('./result/validation_isup.csv')
+    len_val = len(val)
+
+    for i in range(12):
+        plt.subplot(3, 4, i+1)
+        idx = random.randrange(len_val)
+
+        plot_series(x[idx, :, 1], y[idx, :, 1])
+        plt.axhline(val.loc[idx, 'sell_time'], c = 'blue')
+
+
     plt.show()
 
 
 if __name__ == '__main__':
     # show_example()
-    show_trained_result()
+    # show_trained_result_max()
+    show_trained_result_isup()

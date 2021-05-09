@@ -48,3 +48,32 @@ class MyModel(nn.Module):
         x = self.base(x)
         x = self.final(x)
         return x
+
+
+class MyModel2(nn.Module):
+    def __init__(self, channel, fc):
+        super(MyModel2, self).__init__()
+        self.layers = nn.Sequential(
+            nn.Conv1d(4, 128, 7, 1),
+            nn.BatchNorm1d(128),
+            nn.LeakyReLU(),
+            nn.MaxPool1d(5, 2),
+            nn.Conv1d(128, 256, 5, 1),
+            nn.Conv1d(256, 256, 5, 1),
+            nn.LeakyReLU(),
+            nn.BatchNorm1d(256),
+            nn.MaxPool1d(5, 2),
+            nn.Conv1d(256, 512, 5, 1),
+            nn.Conv1d(512, 512, 5, 1),
+            nn.LeakyReLU(),
+            nn.MaxPool1d(5, 2),
+            nn.Flatten(),
+            nn.Linear(fc, 64),
+            nn.Linear(64, 16),
+            nn.Linear(16, 1)
+        )
+
+
+    def forward(self, x):
+        x = self.layers(x)
+        return x
