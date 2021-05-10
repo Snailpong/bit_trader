@@ -70,7 +70,7 @@ class MyModel2(nn.Module):
             nn.Flatten(),
             nn.Linear(fc, 64),
             nn.Linear(64, 16),
-            nn.Linear(16, 1)
+            nn.Linear(16, channel)
         )
 
 

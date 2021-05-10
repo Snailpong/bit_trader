@@ -60,11 +60,19 @@ class MyDataset1(MyBaseDataset):
         blur_y = convolve_1d(self.y[index, :, 1], self.filter)
         current_y = np.array([np.mean(blur_y)])
 
-        # if blur_y.mean() > 1.00:
-            # current_y = 1
-            # current_y = np.array([1])
-        # else:
-            # current_y = 0
-            # current_y = np.array([0])
+        return current_x, current_y
+
+
+class MyDataset2(MyBaseDataset):
+    def __getitem__(self, index):
+        current_x = super().smoothing_x(index)
+        blur_y = convolve_1d(self.y[index, :, 1], self.filter)
+
+        if blur_y.mean() > 1.005:
+            current_y = 1
+        elif blur_y.mean() < 0.995:
+            current_y = 0
+        else:
+            current_y = 2
 
         return current_x, current_y
