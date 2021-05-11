@@ -52,8 +52,20 @@ def train():
         output_day = model_day(val_5_x)
         label = int(np.clip(np.around(output_day.detach().cpu().numpy()[0, 0] * 120.), 0, 119))
 
-        rate = val_5[1][index, -1, 1] / val_5[0][index, -1, 1] * 0.9995 * 0.9995
-        money *= rate
+        val_15_x = val_15[0][index, :, np.array([1, 2, 3, 5])]
+        val_15_x[:, 5] /= np.mean(val_15_x[:, 5])
+        val_15_x = gauss_convolve_instance(val_15_x, [0, 1, 2], 0.5)
+        val_15_x = torch.from_numpy(val_15_x)
+        val_15_x = torch.unsqueeze(val_15_x, 0).to(device, dtype=torch.float32)
+
+        output_day = model_isup(val_15_x)
+        isup = output_day.detach().cpu().numpy()[0, 0]
+
+        rate = val_5[1][index, label, 1] * 0.9995 * 0.9995
+
+        # if np.mean(val_5[0][index, :, 1]) < 1:
+        if isup >= 1:
+            money *= rate
 
 
         print(rate, money, end='')
