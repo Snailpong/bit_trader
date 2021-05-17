@@ -119,8 +119,108 @@ def make_period(period):
     np.save('./data/test_x_' + str(period), test_x_p)
 
 
+def get_MA(df, cycle=5, select_column='close'):
+    ma = df.groupby('sample_id')[select_column].rolling(window=cycle).mean()
+    ma = ma.reset_index()[select_column]
+    ma.name = f'MA_{cycle}min'
+    
+    return pd.concat([df, ma], axis=1)
+    
+def get_MACD(df, short=12, long=26, t=9, select_column='close'):    
+    ma_12 = df.groupby('sample_id').close.ewm(span=12).mean()
+    ma_26 = df.groupby('sample_id').close.ewm(span=26).mean()
+    
+    macd = ma_12 - ma_26
+    macds = macd.ewm(span=9).mean()  #Signal
+    macdo = macd - macds # Osillator
+    
+    macd = macd.reset_index().close
+    macd.name = 'macd'
+    macds = macds.reset_index().close
+    macds.name = 'macds'
+    macdo = macdo.reset_index().close
+    macdo.name = 'macdo'
+    
+    df = df.assign(macd=macd, macds=macds, macdo=macdo).dropna()
+    
+    return df
+
+# Simple Moving Average
+def SMA(df, period=30, column='close'):
+    return df[column].rolling(window=period).mean()
+
+# Relative Strength Index
+# 매수 Signal = Under 30 Point
+# 매도 Signal = Up 70 Point
+
+def get_RSI(df, period=14, select_column='close'):
+    data = df.copy()
+    
+    ma = data.groupby('sample_id')[select_column].diff(1)
+
+    up = ma.copy()
+    down = ma.copy()
+
+    up[up < 0] = 0
+    down[down > 0] = 0
+    data['up'] = up
+    data['down'] = down
+
+    # AD, AU
+    AVG_Gain = SMA(data.copy(), 14, column='up')
+    AVG_Loss = abs(SMA(data.copy(), 14, column='down'))
+
+    RS = AVG_Gain.dropna() / AVG_Loss.dropna()
+    RS = RS.fillna(1)
+    #### fillna parameter 조정 필요
+    
+    RSI = 100.0 - (100 / (1.0 + RS))
+    
+    data['RSI'] = RSI
+    
+    return data
+    
+def make_feature(df, cycle=5, select_column='close'):
+    column = ['sample_id', 'time', 'coin_index', 'open', 'high', 'low', 'close', 'volume']
+    df = df[column]
+    
+    df = get_RSI(df)
+    df = get_MA(df)
+    df = get_MACD(df)
+    
+    return df
+
+
+def npy_to_2d(array):
+    array_2d = np.empty((array.shape[0] * array.shape[1], 12))
+    for i in range(array.shape[0]):
+        for j in range(array.shape[1]):
+            array_2d[i * array.shape[1] + j, 0] = i
+            array_2d[i * array.shape[1] + j, 1] = j
+            array_2d[i * array.shape[1] + j, 2:] = array[i, j]
+    return array_2d
+
+
+def make_period_with_feature():
+    train_x = np.load('./data/train_x_15.npy')
+    test_x = np.load('./data/test_x_15.npy')
+
+    train_x_2d = npy_to_2d(train_x)
+    test_x_2d = npy_to_2d(test_x)
+
+    row_indices = ['sample_id', 'time', 'coin_index', 'open', 'high', 'low', 'close', 'volume', 'quote_av', 'trades', 'tb_base_av', 'tb_quote_av']
+
+    train_df = pd.DataFrame(train_x_2d, columns=row_indices)
+    train_df = train_df.astype({'sample_id': 'int', 'time': 'int'})
+    print(train_df.head(5))
+    train_f_df = make_feature(train_df)
+    print(train_f_df.head(5))
+
+
+
 if __name__ == '__main__':
     # make_npy()
-    make_only_increased()
+    # make_only_increased()
     # make_period(5)
     # make_period(15)
+    make_period_with_feature()
