@@ -212,10 +212,16 @@ def make_period_with_feature():
 
     train_df = pd.DataFrame(train_x_2d, columns=row_indices)
     train_df = train_df.astype({'sample_id': 'int', 'time': 'int'})
-    print(train_df.head(5))
     train_f_df = make_feature(train_df)
-    print(train_f_df.head(5))
+    train_f_array = df2d_to_array3d(train_f_df)
 
+    test_df = pd.DataFrame(test_x_2d, columns=row_indices)
+    test_df = test_df.astype({'sample_id': 'int', 'time': 'int'})
+    test_f_df = make_feature(test_df)
+    test_f_array = df2d_to_array3d(test_f_df)
+
+    np.save('./data/train_x_15_feature', train_f_array)
+    np.save('./data/test_x_15_feature', test_f_array)
 
 
 if __name__ == '__main__':
