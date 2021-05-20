@@ -3,6 +3,7 @@ import pandas as pd
 import torch
 import gc
 import math
+import pickle
 import os
 import random
 import matplotlib.pyplot as plt
@@ -38,6 +39,14 @@ def train():
     model_isup.load_state_dict(torch.load('./model/isup', map_location=device))
     model_isup.eval()
 
+    with open('./model/isup_rf', 'rb') as f:
+        rf = pickle.load(f)
+
+    with open('./data/val_df_feature', 'rb') as f:
+        val_df = pickle.load(f)
+
+    isup_n = np.array(rf.predict(val_df))
+
     money = 10000
 
     for index in range(val_5[0].shape[0]):
@@ -64,7 +73,8 @@ def train():
         rate = val_5[1][index, label, 1] * 0.9995 * 0.9995
 
         # if np.mean(val_5[0][index, :, 1]) < 1:
-        if isup >= 1:
+        # if isup >= 1:
+        if isup_n[index] >= 1:
             money *= rate
 
 

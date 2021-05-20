@@ -3,6 +3,7 @@ import pandas as pd
 import gc
 import torch
 import random
+import pickle
 import math
 import os
 import matplotlib.pyplot as plt
@@ -25,6 +26,9 @@ def test():
     model = MyModel(1, 3584).to(device)
     model.load_state_dict(torch.load('./model/maxday', map_location=device))
     model.eval()
+
+    with open('./isup_rf', 'rb') as f:
+        rf = pickle.load(f)
 
     f = open('./result/submission.csv', 'w')
     f.write('sample_id,buy_quantity,sell_time\n')
