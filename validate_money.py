@@ -16,7 +16,7 @@ from tqdm import tqdm
 import numpy as np
 
 from datasets import MyDataset1, get_dataset
-from models import MyModel, MyModel2
+from models import MyModel, MyModel2, MyModelLSTM
 from utils import init_device_seed, write_val_csv
 from preprocessing import gauss_convolve_instance
 
@@ -25,17 +25,19 @@ BATCH_SIZE = 32
 
 
 def train():
-    device = init_device_seed()
+    device = init_device_seed(1234)
 
     _, val_5, _ = get_dataset('./data/train_x_5.npy', './data/train_y.npy')
     _, val_15, _ = get_dataset('./data/train_x_15.npy', './data/train_y.npy')
     os.makedirs('./model', exist_ok=True)
 
-    model_day = MyModel(1, 3584).to(device)
+    # model_day = MyModel(1, 3584).to(device)
+    model_day = MyModelLSTM(276, 1).to(device)
     model_day.load_state_dict(torch.load('./model/maxday', map_location=device))
     model_day.eval()
 
     model_isup = MyModel2(1, 1024).to(device)
+    # model_isup = MyModelLSTM(92, 1).to(device)
     model_isup.load_state_dict(torch.load('./model/isup', map_location=device))
     model_isup.eval()
 
@@ -73,9 +75,10 @@ def train():
         rate = val_5[1][index, label, 1] * 0.9995 * 0.9995
 
         # if np.mean(val_5[0][index, :, 1]) < 1:
-        # if isup >= 1:
-        if isup_n[index] >= 1:
+        if isup >= 1:
+        # if isup_n[index] >= 1 and label >= 20:
             money *= rate
+        # money *= rate
 
 
         print(rate, money, end='')

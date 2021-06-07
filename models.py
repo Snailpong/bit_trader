@@ -77,3 +77,20 @@ class MyModel2(nn.Module):
     def forward(self, x):
         x = self.layers(x)
         return x
+
+
+class MyModelLSTM(nn.Module):
+    def __init__(self, channel, fc):
+        super(MyModelLSTM, self).__init__()
+        self.lstm = nn.LSTM(input_size=channel, hidden_size=16, num_layers=4, batch_first=True)
+        self.layers = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(64, 16),
+            nn.Linear(16, 1)
+        )
+
+
+    def forward(self, x):
+        x, _ = self.lstm(x)
+        x = self.layers(x)
+        return x

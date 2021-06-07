@@ -15,7 +15,7 @@ from tqdm import tqdm
 import numpy as np
 
 from datasets import MyDataset, get_dataset
-from models import MyModel
+from models import MyModel, MyModelLSTM
 from utils import init_device_seed, write_val_csv
 
 
@@ -23,9 +23,10 @@ BATCH_SIZE = 32
 
 
 def train():
-    device = init_device_seed()
+    device = init_device_seed(1234)
 
-    train, val, indicate = get_dataset('./data/train_x_5_increase.npy', './data/train_y_increase.npy')
+    train, val, indicate = get_dataset('./data/train_x_5.npy', './data/train_y.npy')
+    train, val, indicate = get_dataset('./data/train_x_5_increase.npy', './data/train_y.npy')
     train_dataset = MyDataset(train)
     val_dataset = MyDataset(val)
     train_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
@@ -35,6 +36,7 @@ def train():
 
     # 1: 38912, 5: 3584
     model = MyModel(1, 3584).to(device)
+    model = MyModelLSTM(276, 1).to(device)
     epoch = 0
     min_total_val_loss = 9999
 
@@ -44,7 +46,7 @@ def train():
     mae_criterion = nn.L1Loss()
     mse_criterion = nn.MSELoss()
 
-    while epoch <= 50:
+    while epoch != 10:
         epoch += 1
 
         model.train()
